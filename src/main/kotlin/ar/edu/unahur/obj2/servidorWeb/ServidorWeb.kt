@@ -10,13 +10,15 @@ enum class CodigoHttp(val codigo: Int) {
   NOT_FOUND(404),
 }
 
-class Pedido(val ip: String, val url: String, val fechaHora: LocalDateTime)
+class Pedido(val ip: String, val url: String, val fechaHora: LocalDateTime){
+  fun esProtocolo(protocolo: String) = url.startsWith(protocolo)
+}
 class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, val pedido: Pedido)
 
 class ServidorWeb{
   fun atiende(pedido: Pedido): Respuesta {
     val respuesta : Respuesta
-    if(!pedido.url.startsWith("http:")){
+    if(!pedido.esProtocolo("http:")){
       respuesta = Respuesta(CodigoHttp.NOT_IMPLEMENTED,"",10,pedido)
     }
     else{
