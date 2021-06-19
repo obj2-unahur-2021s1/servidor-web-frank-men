@@ -16,14 +16,11 @@ class Pedido(val ip: String, val url: String, val fechaHora: LocalDateTime){
 class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, val pedido: Pedido)
 
 class ServidorWeb{
-  fun atiende(pedido: Pedido): Respuesta {
-    val respuesta : Respuesta
+  fun atiende(pedido: Pedido): CodigoHttp {
+    var codigo : CodigoHttp = CodigoHttp.OK
     if(!pedido.esProtocolo("http:")){
-      respuesta = Respuesta(CodigoHttp.NOT_IMPLEMENTED,"",10,pedido)
+      codigo = CodigoHttp.NOT_IMPLEMENTED
     }
-    else{
-      respuesta = Respuesta(CodigoHttp.OK,"pagina",1,pedido)
-    }
-    return respuesta
+    return codigo
   }
 }
