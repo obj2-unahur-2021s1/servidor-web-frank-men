@@ -11,16 +11,25 @@ enum class CodigoHttp(val codigo: Int) {
 }
 
 class Pedido(val ip: String, val url: String, val fechaHora: LocalDateTime){
-  fun esProtocolo(protocolo: String) = url.startsWith(protocolo)
+  fun protocolo() = url.substringBefore(":")
+  fun extension() = url.substringAfterLast(".")
 }
 class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, val pedido: Pedido)
 
 class ServidorWeb{
+  val modulosEstablecidos = mutableListOf<Modulo>()
   fun atiende(pedido: Pedido): CodigoHttp {
     var codigo : CodigoHttp = CodigoHttp.OK
-    if(!pedido.esProtocolo("http:")){
+    if(pedido.protocolo() != "http"){
       codigo = CodigoHttp.NOT_IMPLEMENTED
     }
     return codigo
   }
+
+}
+class Modulo(val body: String, val tiempo: Int){
+  val extensionSoportada = mutableListOf<String>()
+  fun agragaExtension(extension: String) = extensionSoportada.add(extension)
+  fun soporta(extension: String) = extensionSoportada.contains(extension)
+
 }
