@@ -1,5 +1,6 @@
 package ar.edu.unahur.obj2.servidorWeb
 
+import ar.edu.unahur.obj2.servidorWeb.CodigoHttp.OK
 import java.time.LocalDateTime
 
 // Para no tener los códigos "tirados por ahí", usamos un enum que le da el nombre que corresponde a cada código
@@ -18,13 +19,31 @@ class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, val p
 
 class ServidorWeb{
   val modulosEstablecidos = mutableListOf<Modulo>()
-  fun atiende(pedido: Pedido): CodigoHttp {
-    var codigo : CodigoHttp = CodigoHttp.OK
+  fun agregarModulo(modulo: Modulo) = modulosEstablecidos.add(modulo)
+  fun puedeAtender(pedido: Pedido): CodigoHttp {
+    var codigo : CodigoHttp = OK
     if(pedido.protocolo() != "http"){
       codigo = CodigoHttp.NOT_IMPLEMENTED
     }
     return codigo
   }
+
+  fun atiende(pedido: Pedido): Respuesta {
+    var codigo = CodigoHttp.NOT_FOUND
+    var body = ""
+    var tiempo = 10
+    val respuesta = Respuesta(codigo,body,tiempo,pedido)
+    if(this.hayModuloPara(pedido)){
+      val modulo = this.moduloPara(pedido)!!
+      return Respuesta(OK,modulo.body,modulo.tiempo,pedido)
+    }
+    return respuesta
+  }
+
+  fun hayModuloPara(pedido: Pedido) = this.moduloPara(pedido)!= null
+
+  fun moduloPara(pedido: Pedido) = modulosEstablecidos.find { it.soporta(pedido.extension()) }
+
 
 }
 class Modulo(val body: String, val tiempo: Int){
