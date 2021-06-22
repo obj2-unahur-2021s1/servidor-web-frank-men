@@ -14,24 +14,28 @@ enum class CodigoHttp(val codigo: Int) {
 class Pedido(val ip: String, val url: String, val fechaHora: LocalDateTime){
   fun protocolo() = url.substringBefore(":")
   fun extension() = url.substringAfterLast(".")
+
+  fun ruta(): String { //para "zafar".
+    val urlSeparated = url.split("/").toMutableList()
+    var i = 3
+    while (i != 0){ urlSeparated.removeFirst();i--}
+    return "/"+urlSeparated.joinToString("/")
+  }
 }
+
+
+
 class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, val pedido: Pedido)
 
-class ServidorWeb{
+class ServidorWeb(val body: String = "",val tiempo: Int = 10){
   val modulosEstablecidos = mutableListOf<Modulo>()
-  fun agregarModulo(modulo: Modulo) = modulosEstablecidos.add(modulo)
-  fun puedeAtender(pedido: Pedido): CodigoHttp {
-    var codigo : CodigoHttp = OK
-    if(pedido.protocolo() != "http"){
-      codigo = CodigoHttp.NOT_IMPLEMENTED
-    }
-    return codigo
-  }
 
-  fun atiende(pedido: Pedido): Respuesta {
-    var codigo = CodigoHttp.NOT_FOUND
-    var body = ""
-    var tiempo = 10
+  fun agregarModulo(modulo: Modulo) = modulosEstablecidos.add(modulo)
+
+  fun puedeAtender(pedido: Pedido) = pedido.protocolo() == "http"
+
+  fun atender(pedido: Pedido): Respuesta {
+    val codigo = CodigoHttp.NOT_FOUND
     val respuesta = Respuesta(codigo,body,tiempo,pedido)
     if(this.hayModuloPara(pedido)){
       val modulo = this.moduloPara(pedido)!!
@@ -46,9 +50,7 @@ class ServidorWeb{
 
 
 }
-class Modulo(val body: String, val tiempo: Int){
-  val extensionSoportada = mutableListOf<String>()
-  fun agragaExtension(extension: String) = extensionSoportada.add(extension)
+class Modulo(val body: String, val tiempo: Int,val extensionSoportada: List<String>){
   fun soporta(extension: String) = extensionSoportada.contains(extension)
 
 }

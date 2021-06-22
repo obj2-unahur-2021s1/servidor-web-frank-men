@@ -10,17 +10,26 @@ class ServidorWebTest : DescribeSpec({
   val pedido1 = Pedido("89.128.99.15","https://pepito.com.ar/documentos/doc1.html", LocalDateTime.now())
   val pedido2 = Pedido("89.12.88.125","http://pepito.com.ar/documentos/doc1.docx", LocalDateTime.now())
   val pedido3 = Pedido("89.128.99.14","https://pepito.com.ar/documentos/doc1.html", LocalDateTime.now())
-  val moduloTexto = Modulo("modulo texto",5)
-  moduloTexto.agragaExtension("docx")
-  moduloTexto.agragaExtension("odt")
-  val moduloImagen = Modulo("modulo imagen",5)
-  moduloImagen.agragaExtension("jpg")
-  moduloImagen.agragaExtension("png")
-  moduloImagen.agragaExtension("gif")
+  val moduloTexto = Modulo("modulo texto",5, listOf("docx","odt"))
+  val moduloImagen = Modulo("modulo imagen",5, listOf("jpg","png","gif"))
+  describe("Un pedido:"){
+    it("Tiene protocolo:"){
+      val pedidoHTML = Pedido("127.0.0.1","http://pepito.com.ar/documentos/doc1.html", LocalDateTime.now())
+      pedidoHTML.protocolo().shouldBe("http")
+    }
+    it("Tiene ruta:"){
+      val pedidoHTML = Pedido("127.0.0.1","http://pepito.com.ar/documentos/doc1.html", LocalDateTime.now())
+      pedidoHTML.ruta().shouldBe("/documentos/doc1.html")
+    }
+    it("Tiene extension:"){
+      val pedidoHTML = Pedido("127.0.0.1","http://pepito.com.ar/documentos/doc1.html", LocalDateTime.now())
+      pedidoHTML.extension().shouldBe("html")
+    }
+  }
   describe("Un servidor web") {
     it("puede atender pedidos"){
-      servidor.puedeAtender(pedido1).shouldBe(CodigoHttp.NOT_IMPLEMENTED)
-      servidor.puedeAtender(pedido2).shouldBe(CodigoHttp.OK)
+      servidor.puedeAtender(pedido1).shouldBe(false)
+      servidor.puedeAtender(pedido2).shouldBe(true)
     }
   }
   describe("Modulos del servidor"){
@@ -31,12 +40,12 @@ class ServidorWebTest : DescribeSpec({
       it("modulo soporta extension"){
         moduloTexto.soporta("docx").shouldBeTrue()
       }
-      it("Servidor atiende pedidos"){
+      it("Servidor atender pedidos"){
         servidor.hayModuloPara(pedido2).shouldBeTrue()
-        servidor.atiende(pedido2).codigo.shouldBe(CodigoHttp.OK)
-        servidor.atiende(pedido2).body.shouldBe("modulo texto")
-        servidor.atiende(pedido2).tiempo.shouldBe(5)
-        servidor.atiende(pedido2).pedido.shouldBe(pedido2)
+        servidor.atender(pedido2).codigo.shouldBe(CodigoHttp.OK)
+        servidor.atender(pedido2).body.shouldBe("modulo texto")
+        servidor.atender(pedido2).tiempo.shouldBe(5)
+        servidor.atender(pedido2).pedido.shouldBe(pedido2)
       }
     }
   }
