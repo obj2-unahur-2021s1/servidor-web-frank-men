@@ -1,5 +1,6 @@
 package ar.edu.unahur.obj2.servidorWeb
 
+import ar.edu.unahur.obj2.servidorWeb.CodigoHttp.NOT_FOUND
 import ar.edu.unahur.obj2.servidorWeb.CodigoHttp.OK
 import java.time.LocalDateTime
 
@@ -29,20 +30,28 @@ class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, val p
 
 class ServidorWeb(val body: String = "",val tiempo: Int = 10){
   val modulosEstablecidos = mutableListOf<Modulo>()
+  val analizadoresEstablecidos = mutableListOf<Analizador>()
+
 
   fun agregarModulo(modulo: Modulo) = modulosEstablecidos.add(modulo)
+  //no es necesario tener setters, se puede usar el .add, pero quedan legibles los tests :)
+  fun agregarAnalizador(analizador: Analizador) = analizadoresEstablecidos.add(analizador)
 
   fun puedeAtender(pedido: Pedido) = pedido.protocolo() == "http"
 
+
   fun atender(pedido: Pedido): Respuesta {
-    val codigo = CodigoHttp.NOT_FOUND
-    val respuesta = Respuesta(codigo,body,tiempo,pedido)
     if(this.hayModuloPara(pedido)){
       val modulo = this.moduloPara(pedido)!!
-      return Respuesta(OK,modulo.body,modulo.tiempo,pedido)
+      val respuesta = Respuesta(OK,modulo.body,modulo.tiempo,pedido)
+      modulo.historialDeRespuestas.add(respuesta)
+      if(hayAnalizadores()){ analizadoresEstablecidos.map { analiz -> analiz.agregarModulo(modulo) } }
+      return respuesta
     }
-    return respuesta
+    else{ return Respuesta(NOT_FOUND,body,tiempo,pedido)}
   }
+
+  fun hayAnalizadores() = this.analizadoresEstablecidos.isNotEmpty()
 
   fun hayModuloPara(pedido: Pedido) = this.moduloPara(pedido)!= null
 
@@ -51,6 +60,7 @@ class ServidorWeb(val body: String = "",val tiempo: Int = 10){
 
 }
 class Modulo(val body: String, val tiempo: Int,val extensionSoportada: List<String>){
+  //es util guardar las respuestas para ls analizadores.
+  var historialDeRespuestas = mutableListOf<Respuesta>()
   fun soporta(extension: String) = extensionSoportada.contains(extension)
-
 }
