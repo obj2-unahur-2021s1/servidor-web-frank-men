@@ -38,14 +38,17 @@ class ServidorWeb(val body: String = "",val tiempo: Int = 10){
 
 
   fun atender(pedido: Pedido): Respuesta {
+    var respuesta = Respuesta(NOT_FOUND,"",10,pedido) // es lo que debe devolver cuando hay error
+    val modulo = this.moduloPara(pedido)!!
     if(this.hayModuloPara(pedido)){
-      val modulo = this.moduloPara(pedido)!!
-      val respuesta = Respuesta(OK,modulo.body,modulo.tiempo,pedido)
-      modulo.historialDeRespuestas.add(respuesta)
-      if(hayAnalizadores()){ analizadoresEstablecidos.map { analiz -> analiz.agregarModulo(modulo) } }
-      return respuesta
+      respuesta = Respuesta(OK,modulo.body,modulo.tiempo,pedido)
+      modulo.agregaRespuesta(respuesta)
     }
-    else{ return Respuesta(NOT_FOUND,body,tiempo,pedido)}
+    if(hayAnalizadores()){
+      analizadoresEstablecidos.map { it.agregarModulo(modulo) }
+      analizadoresEstablecidos.map { it.agregarRespuesta(respuesta) }
+    }
+    return respuesta
   }
 
   fun hayAnalizadores() = this.analizadoresEstablecidos.isNotEmpty()
@@ -58,5 +61,9 @@ class ServidorWeb(val body: String = "",val tiempo: Int = 10){
 }
 class Modulo(val body: String, val tiempo: Int,val extensionSoportada: List<String>){
   val historialDeRespuestas = mutableListOf<Respuesta>()
+  fun agregaRespuesta(respuesta: Respuesta) = historialDeRespuestas.add(respuesta)
   fun soporta(extension: String) = extensionSoportada.contains(extension)
+  fun cantidadDeRespuestasParaIp(ip: String) = pedidosDelModulo().count { it.ip == ip }
+  fun pedidosDelModulo() = historialDeRespuestas.map{it.pedido}
+
 }

@@ -66,9 +66,9 @@ class ServidorWebTest : DescribeSpec({
       sv.atender(Pedido("1.1.1.1","http://hola/asd/qwe/sapito.txt",fecha))
       sv.atender(Pedido("1.1.1.1","http://hola/asd/video/guau.mp4",fecha))
       sv.atender(Pedido("1.1.1.1","http://hola/asd/video/miau.avi",fecha))
-      analizaDemoras.demoraDe(moduloTextos).shouldBe(0)
-      analizaDemoras.demoraDe(moduloFotos).shouldBe(2)
-      analizaDemoras.demoraDe(moduloVideos).shouldBe(2)
+      analizaDemoras.cantidadDeRespDemoradas(moduloTextos).shouldBe(0)
+      analizaDemoras.cantidadDeRespDemoradas(moduloFotos).shouldBe(2)
+      analizaDemoras.cantidadDeRespDemoradas(moduloVideos).shouldBe(2)
     }
     describe("Un analizador de ip's sospechosas"){
       it("Puede ver los pedidos totales de una ip sospechosa:"){
@@ -76,7 +76,7 @@ class ServidorWebTest : DescribeSpec({
         val moduloTextos = Modulo("qwe",5, listOf("txt","docx","odt"));sv.agregarModulo(moduloTextos)
         val moduloFotos = Modulo("asd",15, listOf("jpg","png","gif"));sv.agregarModulo(moduloFotos)
         val moduloVideos = Modulo("zxc",25, listOf("avi","mp4","dvd"));sv.agregarModulo(moduloVideos)
-        val analizaIpes = AnalizadorIpSospechosa(listOf("1.1.1.1","2.2.2.2","7.7.7.7"));sv.agregarAnalizador(analizaIpes)
+        val analizaIpes = AnalizadorIpSospechosa();sv.agregarAnalizador(analizaIpes)
         sv.atender(Pedido("1.1.1.1","http://hola/asd/perrito.jpg",fecha))
         sv.atender(Pedido("2.2.2.2","http://hola/asd/gato.gif",fecha))
         sv.atender(Pedido("2.2.2.2","http://hola/asd/sapito.txt",fecha))
@@ -84,16 +84,18 @@ class ServidorWebTest : DescribeSpec({
         sv.atender(Pedido("5.1.1.1","http://hola/asd/miau.avi",fecha))
         sv.atender(Pedido("2.2.2.2","http://hola/asd/croak.odt",fecha))
         sv.atender(Pedido("2.2.2.2","http://hola/asd/prrr.docx",fecha))
-        analizaIpes.pedidosDeLaIpSospechosa("1.1.1.1").shouldBe(1)
-        analizaIpes.pedidosDeLaIpSospechosa("2.2.2.2").shouldBe(4)
-        analizaIpes.pedidosDeLaIpSospechosa("7.7.7.7").shouldBe(0)
+        analizaIpes.pedidosDeIpSospechosa("1.1.1.1").shouldBe(1)
+        analizaIpes.pedidosDeIpSospechosa("2.2.2.2").shouldBe(4)
+        analizaIpes.pedidosDeIpSospechosa("7.7.7.7").shouldBe(0)
       }
       it("Puede ver cual es el modulo mas consultado por ip's sospechosas:"){
         val sv = ServidorWeb()
         val moduloTextos = Modulo("qwe",5, listOf("txt","docx","odt"));sv.agregarModulo(moduloTextos)
         val moduloFotos = Modulo("asd",15, listOf("jpg","png","gif"));sv.agregarModulo(moduloFotos)
         val moduloVideos = Modulo("zxc",25, listOf("avi","mp4","dvd"));sv.agregarModulo(moduloVideos)
-        val analizaIpes = AnalizadorIpSospechosa(listOf("1.1.1.1","2.2.2.2","7.7.7.7"));sv.agregarAnalizador(analizaIpes)
+        val analizaIpes = AnalizadorIpSospechosa();sv.agregarAnalizador(analizaIpes)
+        analizaIpes.ipSospechosas.add("2.2.2.2")
+        analizaIpes.ipSospechosas.add("0.0.0.2")
         sv.atender(Pedido("1.1.1.1","http://hola/asd/perrito.jpg",fecha))
         sv.atender(Pedido("2.2.2.2","http://hola/asd/gato.gif",fecha))
         sv.atender(Pedido("2.2.2.2","http://hola/asd/sapito.txt",fecha))
@@ -101,7 +103,7 @@ class ServidorWebTest : DescribeSpec({
         sv.atender(Pedido("5.1.1.1","http://hola/asd/miau.avi",fecha))
         sv.atender(Pedido("2.2.2.2","http://hola/asd/croak.odt",fecha))
         sv.atender(Pedido("2.2.2.2","http://hola/asd/prrr.docx",fecha))
-        analizaIpes.pedidosDeLaIpAlModulo(moduloTexto,"2.2.2.2").shouldBe(3)
+        analizaIpes.moduloMasConsultadoPorIpSospechosas().shouldBe(moduloTextos)
       }
     }
   }
