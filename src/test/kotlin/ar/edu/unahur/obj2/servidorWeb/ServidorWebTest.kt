@@ -13,6 +13,7 @@ class ServidorWebTest : DescribeSpec({
   val pedido3 = Pedido("89.128.99.14","https://pepito.com.ar/documentos/doc1.html", fecha)
   val moduloTexto = Modulo("modulo texto",5, listOf("docx","odt"))
   val moduloImagen = Modulo("modulo imagen",5, listOf("jpg","png","gif"))
+  //-----------------------------------------------------------------------PEDIDOS
   describe("Un pedido:"){
     it("Tiene protocolo:"){
       val pedidoHTML = Pedido("127.0.0.1","http://pepito.com.ar/documentos/doc1.html", fecha)
@@ -27,12 +28,14 @@ class ServidorWebTest : DescribeSpec({
       pedidoHTML.extension().shouldBe("html")
     }
   }
+  //-----------------------------------------------------------------------SERVIDOR
   describe("Un servidor web") {
     it("puede atender pedidos"){
       servidor.puedeAtender(pedido1).shouldBe(false)
       servidor.puedeAtender(pedido2).shouldBe(true)
     }
   }
+  //-----------------------------------------------------------------------MODULOS
   describe("Modulos del servidor"){
     describe("Agrgar Modulo al servidor"){
       servidor.agregarModulo(moduloTexto)
@@ -50,6 +53,7 @@ class ServidorWebTest : DescribeSpec({
       }
     }
   }
+  //-----------------------------------------------------------------------ANALIZADOR
   describe("Un analizador:"){
     it("Un analizador de demora"){
       val sv = ServidorWeb()
@@ -65,6 +69,23 @@ class ServidorWebTest : DescribeSpec({
       analizaDemoras.demoraDe(moduloTextos).shouldBe(0)
       analizaDemoras.demoraDe(moduloFotos).shouldBe(2)
       analizaDemoras.demoraDe(moduloVideos).shouldBe(2)
+    }
+    it("Un analizador de ip's sospechosas"){
+      val sv = ServidorWeb()
+      val moduloTextos = Modulo("qwe",5, listOf("txt","docx","odt"));sv.agregarModulo(moduloTextos)
+      val moduloFotos = Modulo("asd",15, listOf("jpg","png","gif"));sv.agregarModulo(moduloFotos)
+      val moduloVideos = Modulo("zxc",25, listOf("avi","mp4","dvd"));sv.agregarModulo(moduloVideos)
+      val analizaIpes = AnalizadorIpSospechosa(listOf("1.1.1.1","2.2.2.2","7.7.7.7"));sv.agregarAnalizador(analizaIpes)
+      sv.atender(Pedido("1.1.1.1","http://hola/asd/perrito.jpg",fecha))
+      sv.atender(Pedido("2.2.2.2","http://hola/asd/gato.gif",fecha))
+      sv.atender(Pedido("2.2.2.2","http://hola/asd/sapito.txt",fecha))
+      sv.atender(Pedido("4.1.1.1","http://hola/asd/guau.mp4",fecha))
+      sv.atender(Pedido("5.1.1.1","http://hola/asd/miau.avi",fecha))
+      sv.atender(Pedido("2.2.2.2","http://hola/asd/croak.odt",fecha))
+      sv.atender(Pedido("2.2.2.2","http://hola/asd/prrr.docx",fecha))
+      analizaIpes.pedidosDeLaIpSospechosa("1.1.1.1").shouldBe(1)
+      analizaIpes.pedidosDeLaIpSospechosa("2.2.2.2").shouldBe(4)
+      analizaIpes.pedidosDeLaIpSospechosa("7.7.7.7").shouldBe(0)
     }
   }
 })

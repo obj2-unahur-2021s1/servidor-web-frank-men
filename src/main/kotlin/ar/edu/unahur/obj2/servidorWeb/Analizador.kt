@@ -2,27 +2,37 @@ package ar.edu.unahur.obj2.servidorWeb
 
 
 abstract class Analizador {
-    abstract val modulos: MutableList<Modulo>
+    abstract val modulos: MutableSet<Modulo>
 
     fun agregarModulo(modulo: Modulo){ modulos.add(modulo) }
 
+    fun listaDeRespuestas(): List<Respuesta>{
+        val listaRespuestas = mutableListOf<Respuesta>()
+        for (mod in modulos){ listaRespuestas.addAll(mod.historialDeRespuestas) }
+        return listaRespuestas
+    }
+
+    fun listaDePedidos(): List<Pedido>{
+        val listaPedidos = mutableListOf<Pedido>()
+        for (res in listaDeRespuestas()){ listaPedidos.add(res.pedido) }
+        return listaPedidos
+    }
 }
 
 class AnalizadorDemora(val demoraMinima: Int): Analizador(){
-    override val modulos = mutableListOf<Modulo>()
+    override val modulos = mutableSetOf<Modulo>()
 
     fun demoraDe(modulo: Modulo): Int {
-        val listaDeRespuestas = modulo.historialDeRespuestas
-        return listaDeRespuestas.count { resp -> resp.tiempo > demoraMinima }
+        val respuestasDelModulo = modulo.historialDeRespuestas
+        return respuestasDelModulo.count { resp -> resp.tiempo > demoraMinima }
     }
 }
 
-class AnalizadorIpSospechosa(val ipSospechosas: MutableList<String>): Analizador(){
-    override val modulos = mutableListOf<Modulo>()
+class AnalizadorIpSospechosa(val ipSospechosas: List<String>): Analizador(){
+    override val modulos = mutableSetOf<Modulo>()
+    val pedidos = mutableListOf<Pedido>()
 
-    fun pedidosDeLaIpSospechosa(ipSospechosas: Int): Int{
-        TODO("Todavia no")
-    }
+    fun pedidosDeLaIpSospechosa(ipSospechosa: String) = (listaDePedidos().count { p -> p.ip == ipSospechosa })
 
     fun moduloMasConsultado(): Modulo{ //de TODAS las ip.
         TODO("Todavia no")

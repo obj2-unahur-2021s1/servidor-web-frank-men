@@ -17,12 +17,11 @@ class Pedido(val ip: String, val url: String, val fechaHora: LocalDateTime){
   fun extension() = url.substringAfterLast(".")
   fun ruta(): String {
     val urlSeparated = url.split("/").toMutableList()
-    var i = 3
-    while (i != 0){ urlSeparated.removeFirst();i--}
+    var i = 0
+    while (i != 3){ urlSeparated.removeFirst();i++}
     return "/"+urlSeparated.joinToString("/")
   }
 }
-
 
 
 class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, val pedido: Pedido)
@@ -58,6 +57,6 @@ class ServidorWeb(val body: String = "",val tiempo: Int = 10){
 
 }
 class Modulo(val body: String, val tiempo: Int,val extensionSoportada: List<String>){
-  var historialDeRespuestas = mutableListOf<Respuesta>()
+  val historialDeRespuestas = mutableListOf<Respuesta>()
   fun soporta(extension: String) = extensionSoportada.contains(extension)
 }
