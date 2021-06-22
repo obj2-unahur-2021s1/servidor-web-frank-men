@@ -15,8 +15,7 @@ enum class CodigoHttp(val codigo: Int) {
 class Pedido(val ip: String, val url: String, val fechaHora: LocalDateTime){
   fun protocolo() = url.substringBefore(":")
   fun extension() = url.substringAfterLast(".")
-
-  fun ruta(): String { //para "zafar".
+  fun ruta(): String {
     val urlSeparated = url.split("/").toMutableList()
     var i = 3
     while (i != 0){ urlSeparated.removeFirst();i--}
@@ -34,7 +33,6 @@ class ServidorWeb(val body: String = "",val tiempo: Int = 10){
 
 
   fun agregarModulo(modulo: Modulo) = modulosEstablecidos.add(modulo)
-  //no es necesario tener setters, se puede usar el .add, pero quedan legibles los tests :)
   fun agregarAnalizador(analizador: Analizador) = analizadoresEstablecidos.add(analizador)
 
   fun puedeAtender(pedido: Pedido) = pedido.protocolo() == "http"
@@ -60,7 +58,6 @@ class ServidorWeb(val body: String = "",val tiempo: Int = 10){
 
 }
 class Modulo(val body: String, val tiempo: Int,val extensionSoportada: List<String>){
-  //es util guardar las respuestas para ls analizadores.
   var historialDeRespuestas = mutableListOf<Respuesta>()
   fun soporta(extension: String) = extensionSoportada.contains(extension)
 }
